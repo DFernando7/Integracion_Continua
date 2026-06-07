@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
 
+  
+  # CONTENEDOR 1: Aplicación Flask (Python)
+  
   app:
     build:
       context: ./app
@@ -21,6 +24,9 @@ services:
       - red_integracion
     restart: on-failure
 
+
+  # CONTENEDOR 2: Base de datos PostgreSQL
+ 
   db:
     image: postgres:15-alpine
     container_name: postgres_db
@@ -40,9 +46,24 @@ services:
     networks:
       - red_integracion
 
+  # CONTENEDOR 3: Jenkins CI/CD
+ 
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins_ci
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      - red_integracion
+    restart: unless-stopped
+
 networks:
   red_integracion:
     driver: bridge
 
 volumes:
   postgres_data:
+  jenkins_home:
