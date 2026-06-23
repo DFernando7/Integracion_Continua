@@ -1,0 +1,45 @@
+language: python
+
+python:
+  - "3.11"
+
+services:
+  - docker
+
+branches:
+  only:
+    - main
+
+before_install:
+  - echo "🐳 Verificando versión de Docker..."
+  - docker --version
+  - echo "📦 Verificando Docker Compose..."
+  - docker compose version
+
+install:
+  - echo "📥 Instalando dependencias de Python..."
+  - pip install flask==3.0.2 psycopg2-binary==2.9.9
+
+script:
+  - echo "🔨 Construyendo imagen Docker de la aplicación..."
+  - docker build -t flask_app ./app
+  - echo "✅ Imagen construida exitosamente"
+  - echo "🧪 Verificando imagen creada..."
+  - docker images | grep flask_app
+  - echo "🚀 Verificando despliegue del contenedor..."
+  - docker run -d --name flask_test -p 5001:5000 flask_app
+  - sleep 5
+  - docker ps | grep flask_test
+  - docker stop flask_test
+  - docker rm flask_test
+
+after_success:
+  - echo "🎉 Pipeline Travis CI ejecutado con éxito"
+
+after_failure:
+  - echo "❌ El pipeline falló. Revisar logs."
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
